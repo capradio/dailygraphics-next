@@ -43,6 +43,13 @@ We recognize that environment variables are not perfectly secure (since installe
 
 The Google OAuth variables should match the client ID and secret for an API app that can access your account. `This post <http://blog.apps.npr.org/2015/03/02/app-template-oauth.html>`_ has details on setting that up.
 
+Alternatively, `service account authentication <https://developers.google.com/identity/protocols/OAuth2ServiceAccount>`_ is also supported. To create a service account and JSON key file, visit your project's `GCP web console <https://console.cloud.google.com/iam-admin/serviceaccounts>`_ to get started.
+
+After creating the service account:
+
+1. Grant write access on your Drive folder (``driveFolder`` in ``config.json``) to the service account email address.
+2. Set GOOGLE_APPLICATION_CREDENTIALS to the file path of the JSON file containing your credentials.
+
 If you're deploying to S3, which is the default for the rig, you'll also need to set:
 
 * AWS_ACCESS_KEY_ID
@@ -58,9 +65,11 @@ The server supports a number of command-line arguments to customize its behavior
 * ``--port XXXX`` - sets the port that the server will listen on to XXXX.
 * ``--live-reload XXXX`` - sets the port for the live reload server.
 * ``--force-sheet-cache`` - forces graphics preview pages to cache Google Sheets, so that you must press the "Refresh sheet" button when data is changed instead of simply reloading the page. Good for slow connections.
-* ``--no-live-reload`` - Turns off live reload when files are edited. 
+* ``--no-live-reload`` - Turns off live reload when files are edited.
 * ``--no-websockets`` - Turns off the websocket debugging connection. Along with disabling live reload, this may be good in a hosted installation environment.
 * ``--disable-headless`` - Show the Chrome window when capturing fallback images, which can help on some computers
+* ``--target`` - Choose between "stage" and "live" (default of "live") for deployment to S3
+* ``--deployTo`` - Override the ``deployTo`` config.json option (see [Deployment](#deployment), below)
 
 Due to the way NPM scripts work, flags must be passed after a ``--`` separator. For example, running the rig on port 7777 would look like ``npm start -- --port 7777``.
 
@@ -74,6 +83,8 @@ Authorizing Google access
 -------------------------
 
 Similar to the original dailygraphics rig, you need to authorize this app's API access to access and create Drive files (for the spreadsheets that back each page). When the initial list page loads, it should redirect you to a Google log-in screen--just follow the instructions to complete the process. You'll need to create a Google API app, enable Drive access and store its authentication values in the ``GOOGLE_OAUTH_CLIENT_ID`` and ``GOOGLE_OAUTH_CONSUMER_SECRET`` environment variables. Your OAuth tokens are stored in your home directory as ``.google_oauth_tokens``.
+
+To do this step, you must run the rig on port 8000 (the default port). After you've done this step, you can run the rig on a different port.
 
 Creating a graphic
 ------------------
@@ -177,6 +188,10 @@ This usually means your graphic requires a library that you don't have installed
 *I updated the rig, and now it's complaining that it can't find a module when it starts up*
 
 Oops! Looks like we added a dependency, and didn't let you know about it. Run ``npm i`` in the ``dailygraphics-next`` directory to install whatever was missing.
+
+*When I try to start the rig, it complains about "EMFILE: too many open files"*
+
+This is a problem that can occur on OS X due to the way it handles watching files. Update to the latest version of the rig and run an ``npm install``, or ``npm i fsevents`` to install a helper module if you're unable to update.
 
 Known issues
 ------------

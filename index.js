@@ -1,13 +1,14 @@
 var init = async function() {
   var server = require("./server");
   var readJSON = require("./lib/readJSON");
+  var configuration = require("./lib/configuration");
 
-  var config = await readJSON("./config.json");
+  var config = await configuration.load("./config.json");
 
-  var environmentWhitelist = [
-    "GOOGLE_OAUTH_CLIENT_ID",
-    "GOOGLE_OAUTH_CONSUMER_SECRET"
-  ];
+  var environmentWhitelist = [];
+  if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+    environmentalWhitelist = ["GOOGLE_OAUTH_CLIENT_ID", "GOOGLE_OAUTH_CONSUMER_SECRET"];
+  }
 
   if (!config.deployTo || config.deployTo == "s3") {
     environmentWhitelist.push("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY");
